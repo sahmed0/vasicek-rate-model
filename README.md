@@ -54,3 +54,33 @@ To simulate the SDE, I implemented the Euler-Maruyama method. The random shock i
 shock = sigma * np.sqrt(dt) * np.random.normal()
 rates[t] = rates[t-1] + drift + shock
 ```
+
+## Tech Stack
+- Frontend: Streamlit (Custom CSS for glassmorphism/fintech UI).
+- Computation: NumPy & SciPy (Vectorised calculations for yield curves).
+- Visualisation: Plotly (Interactive charts with 'hover-unified' contexts).
+  
+##🚀 Installation & Usage
+To run this project locally:
+
+Clone the repository
+```Bash
+git clone [ttps://github.com/sahmed0/bond-pricing.git
+cd bond-pricing
+```
+Create a virtual environment
+```Bash
+python -m venv venv
+source venv/bin/activate  # On Windows use: venv\Scripts\activate
+```
+Install dependencies
+```Bash
+pip install -r requirements.txt
+```
+Launch the application
+```Bash
+streamlit run app.py
+```
+
+##💡 Insights & Risk Analysis
+The dashboard includes logic to detect Yield Curve Inversion ($r_{long} < r_{short}$), a reliable leading indicator of economic recession. The probability forecaster also calculates 95% Confidence Intervals for future rates, aiding in VaR (Value at Risk) analysis.
