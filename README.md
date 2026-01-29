@@ -1,4 +1,4 @@
-# Vasicek Interest Rate Pricing Engine
+# Vasicek Interest Rate Model
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://vasicekmodel.streamlit.app)
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
