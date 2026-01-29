@@ -65,8 +65,8 @@ To run this project locally:
 
 Clone the repository
 ```Bash
-git clone [ttps://github.com/sahmed0/bond-pricing.git
-cd bond-pricing
+git clone [ttps://github.com/sahmed0/vasicek-rate-model.git
+cd vasicek-rate-model
 ```
 Create a virtual environment
 ```Bash
