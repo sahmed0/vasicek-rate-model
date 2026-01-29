@@ -7,6 +7,8 @@
 
 > **Live Demo:** [Click here to launch the dashboard](https://vasicekmodel.streamlit.app)
 
+*(Note: The webapp is hosted on a free instance. Please allow 30 seconds for the server to wake up upon first access.)*
+
 ## 📉 Project Overview
 This project is an interactive quantitative finance dashboard that models interest rate term structures using the **Vasicek Short-Rate Model**.
 
