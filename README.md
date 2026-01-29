@@ -12,12 +12,12 @@
 ## 📉 Project Overview
 This project is an interactive quantitative finance dashboard that models interest rate term structures using the **Vasicek Short-Rate Model**.
 
-Built with **Python** and **Streamlit**, it serves as a pricing engine that bridges the gap between Stochastic Differential Equations (SDEs) and practical risk management. It demonstrates how mean reversion affects bond pricing and allows users to visualise complex risk scenarios, such as yield curve inversions, in real time.
+Built with **Python** and **Streamlit**, it bridges the gap between solving Stochastic Differential Equations (SDEs) and modelling Bonds and Interest Rates. It demonstrates how mean reversion affects bond pricing and allows users to visualise complex risk scenarios, such as yield curve inversions, in real time.
 
 ### 🎯 Key Objectives
-* **Stochastic Modelling:** Visualise the evolution of interest rates using Monte Carlo simulations.
+* **Stochastic Modelling:** Visualise the time-evolution of interest rates according to the Vasicek Model using the Euler-Maruyama method and Monte Carlo simulations.
 * **Analytical Pricing:** Derive the Zero-Coupon Yield Curve using the model's affine term structure.
-* **Risk Forecasting:** Quantify interest rate probabilities using analytical statistical properties (Ornstein-Uhlenbeck process).
+* **Risk Forecasting:** Quantify interest rate probabilities using the Normal Distribution.
 
 ---
 
@@ -29,7 +29,7 @@ Built with **Python** and **Streamlit**, it serves as a pricing engine that brid
 ---
 
 ## 🧮 The Mathematics
-The core of the engine relies on the Vasicek SDE, which assumes the instantaneous short rate $r_t$ follows a mean-reverting process:
+The core of the webapp relies on the Vasicek Model SDE, which assumes the instantaneous short rate $r_t$ follows a mean-reverting process:
 
 $$dr_t = a(b - r_t)dt + \sigma dW_t$$
 
@@ -39,6 +39,17 @@ Where:
 * $\sigma$: Instantaneous volatility.
 * $dW_t$: Wiener process under the risk-neutral measure $\mathbb{Q}$.
 
+The webapp solves this equation using the **Euler-Maruyama Discretisation method** and **Monte Carlo Simulation**.
+
+### Euler-Maruyama Discretisation
+To simulate the SDE, I implemented the Euler-Maruyama method. The random shock is scaled by $\sqrt{dt}$ to account for the properties of Brownian Motion variance ($Var(W_t) = t$).
+
+```python
+# Snippet from vasicek.py
+shock = sigma * np.sqrt(dt) * np.random.normal()
+rates[t] = rates[t-1] + drift + shock
+```
+
 ### Closed-Form Bond Pricing
 A key feature of this project is the implementation of the **Affine Term Structure** solution. The price of a Zero-Coupon Bond $P(t,T)$ is calculated analytically, ensuring $O(1)$ performance rather than relying on computationally expensive Monte Carlo convergence for pricing:
 
@@ -47,15 +58,6 @@ $$P(t, T) = A(t, T) e^{-B(t, T) r_t}$$
 ---
 
 ## 🛠️ Technical Implementation
-
-### 1. Euler-Maruyama Discretisation
-To simulate the SDE, I implemented the Euler-Maruyama method. The random shock is scaled by $\sqrt{dt}$ to account for the properties of Brownian Motion variance ($Var(W_t) = t$).
-
-```python
-# Snippet from vasicek.py
-shock = sigma * np.sqrt(dt) * np.random.normal()
-rates[t] = rates[t-1] + drift + shock
-```
 
 ## Tech Stack
 - Frontend: Streamlit (Custom CSS for glassmorphism/fintech UI).
