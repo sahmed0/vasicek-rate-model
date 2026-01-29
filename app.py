@@ -69,8 +69,8 @@ st.markdown("""
 col_logo, col_title = st.columns([1, 10])
 
 with col_title:
-    st.title("Vasicek Rate Model")
-    st.markdown("Interactive Interest Rate Modelling")
+    st.title(" 📈 Vasicek Rate Model")
+    st.markdown("Interactive Interest Rate Modelling by solving the Vasicek SDE")
 
 st.markdown("---")
 
@@ -92,7 +92,7 @@ with st.expander("⚙️ Model Configuration (Click to Expand)", expanded=True):
 
 # --- 5. MAIN CONTENT TABS ---
 tab_sim, tab_yield, tab_dist, tab_maths, tab_code = st.tabs([
-    "📈 Vasicek Simulation", 
+    "📈 Interest Rate Model", 
     "📊 Bond Yield Curve", 
     "🎯 Probability Forecast",
     "🧮 The Mathematics",
@@ -100,11 +100,11 @@ tab_sim, tab_yield, tab_dist, tab_maths, tab_code = st.tabs([
 ])
 
 # ==========================================
-# TAB 1: PATH SIMULATION
+# TAB 1: VASICEK SIMULATION
 # ==========================================
 with tab_sim:
-    st.markdown("### Interest Rate Monte Carlo Simulation")
-    st.caption(f"Visualizing {num_simulations} stochastic paths evolving over {time_horizon} years.")
+    st.markdown("### Vasicek Interest Rate Model")
+    st.caption(f"Visualizing {num_simulations} stochastic paths evolving over {time_horizon} years. Each path is calculated using the Euler-Maruyama method to solve the Vasicek SDE.")
     
     # Run Simulation
     fig_sim = go.Figure()
@@ -156,7 +156,7 @@ with tab_sim:
 # ==========================================
 with tab_yield:
     st.markdown("### Term Structure of Interest Rates")
-    st.caption("Implied Zero-Coupon Yield Curve based on current parameters.")
+    st.caption("This is the Implied Zero-Coupon Yield Curve based on the current parameters.")
     
     yc_maturities, yc_yields = calculate_yield_curve(current_rate, reversion_speed, long_term_mean, volatility)
     
@@ -283,9 +283,9 @@ with tab_maths:
 # TAB 5: THE CODE (IMPLEMENTATION)
 # ==========================================
 with tab_code:
-    st.markdown("### 1. Euler-Maruyama Discretization")
+    st.markdown("### 1. Euler-Maruyama Discretisation")
     st.markdown("""
-    Since continuous time ($$ dt_0 $$) is impossible to model on a discrete computer, we approximate the SDE using the **Euler-Maruyama method**.
+    Since continuous time ($$ dt_0 $$) is impossible to model on a discrete computer, we approximate the Vasicek SDE using the **Euler-Maruyama method**.
     
     This transforms the differential equation into an iterative update rule:
     """)
@@ -304,7 +304,7 @@ with tab_code:
         rates[t] = rates[t-1] + drift + shock
     """, language="python")
     
-    st.markdown("### 2. Analytical Expectations")
+    st.markdown("### 2. Probability Forecast")
     st.markdown("""
     To generate the "Probability Forecast" tab, we do not need to run simulations. We use the statistical properties of the normal distribution derived from the model:
     """)

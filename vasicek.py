@@ -23,7 +23,8 @@ def simulate_vasicek(r0, a, b, sigma, T=1.0, dt=0.01):
     # Initialising an array to hold my rates, starting with the current rate (r0)
     rates = np.zeros(N)
     rates[0] = r0
-    
+
+    # Euler-Maruyama Discretisation + Monte Carlo Simulation
     # Looping through time to calculate the next rate based on the previous one
     for t in range(1, N):
         # This is the "Drift": pulling the rate back towards the mean (b)
