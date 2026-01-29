@@ -1,11 +1,11 @@
 # Vasicek Interest Rate Pricing Engine
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://vasicek.streamlit.app)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://vasicekmodel.streamlit.app)
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Status-Live-success)
 
-> **Live Demo:** [Click here to launch the dashboard](https://vasicek.streamlit.app)
+> **Live Demo:** [Click here to launch the dashboard](https://vasicekmodel.streamlit.app)
 
 ## 📉 Project Overview
 This project is an interactive quantitative finance dashboard that models interest rate term structures using the **Vasicek Short-Rate Model**.
@@ -20,7 +20,7 @@ Built with **Python** and **Streamlit**, it serves as a pricing engine that brid
 ---
 
 ## 📸 Screenshots
-![vasicek simulation](sim.png)
+![ simulation](sim.png)
 ![yield curve](yield.png)
 ![probability](gauss.png)
 
