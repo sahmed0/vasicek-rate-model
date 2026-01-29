@@ -10,7 +10,7 @@
 ## 📉 Project Overview
 This project is an interactive quantitative finance dashboard that models interest rate term structures using the **Vasicek Short-Rate Model**.
 
-Built with **Python** and **Streamlit**, it serves as a pricing engine that bridges the gap between Stochastic Differential Equations (SDEs) and practical risk management. It demonstrates how mean-reversion affects bond pricing and allows users to visualise complex risk scenarios, such as yield curve inversions, in real-time.
+Built with **Python** and **Streamlit**, it serves as a pricing engine that bridges the gap between Stochastic Differential Equations (SDEs) and practical risk management. It demonstrates how mean reversion affects bond pricing and allows users to visualise complex risk scenarios, such as yield curve inversions, in real time.
 
 ### 🎯 Key Objectives
 * **Stochastic Modelling:** Visualise the evolution of interest rates using Monte Carlo simulations.
@@ -60,7 +60,7 @@ rates[t] = rates[t-1] + drift + shock
 - Computation: NumPy & SciPy (Vectorised calculations for yield curves).
 - Visualisation: Plotly (Interactive charts with 'hover-unified' contexts).
   
-##🚀 Installation & Usage
+## Installation & Usage
 To run this project locally:
 
 Clone the repository
@@ -82,5 +82,5 @@ Launch the application
 streamlit run app.py
 ```
 
-##💡 Insights & Risk Analysis
+## Insights & Risk Analysis
 The dashboard includes logic to detect Yield Curve Inversion ($r_{long} < r_{short}$), a reliable leading indicator of economic recession. The probability forecaster also calculates 95% Confidence Intervals for future rates, aiding in VaR (Value at Risk) analysis.
