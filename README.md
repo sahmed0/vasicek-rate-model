@@ -92,11 +92,6 @@ The dashboard includes logic to detect Yield Curve Inversion ($r_{long} < r_{sho
 Copyright © 2026 Sajid Ahmed. All Rights Reserved.
 
 This repository is intended solely for portfolio review and recruitment purposes. By accessing this repository, you acknowledge the following terms:
-
-View Only: Permission is granted to view the source code for the purpose of evaluating my professional skills and experience.
-
-No Unauthorised Use: No permission is granted to copy, modify, distribute, or use this code for any personal, commercial, or educational project.
-
-No AI Training: Use of this source code for the purpose of training machine learning models or generative AI is strictly prohibited.
-
-If you are a recruiter or a potential collaborator and have questions regarding the implementation of this project, please feel free to reach out via my contact details below.
+- View Only: Permission is granted to view the source code for the purpose of evaluating my professional skills and experience.
+- No Unauthorised Use: No permission is granted to copy, modify, distribute, or use this code for any personal, commercial, or educational project.
+- No AI Training: Use of this source code for the purpose of training machine learning models or generative AI is strictly prohibited.
