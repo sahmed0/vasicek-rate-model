@@ -1,5 +1,6 @@
 # Vasicek Interest Rate Model
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://vasicekmodel.streamlit.app)
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
 ![Status](https://img.shields.io/badge/Status-Live-success)
@@ -8,26 +9,26 @@
 
 *(Note: The webapp is hosted on a free instance. Please allow 30 seconds for the server to wake up upon first access.)*
 
-## 📉 Project Overview
+## Project Overview
 This project is an interactive quantitative finance dashboard that models interest rate term structures using the **Vasicek Short-Rate Model**.
 
 Built with **Python** and **Streamlit**, it bridges the gap between solving Stochastic Differential Equations (SDEs) and modelling Bonds and Interest Rates. It demonstrates how mean reversion affects bond pricing and allows users to visualise complex risk scenarios, such as yield curve inversions, in real time.
 
-### 🎯 Key Objectives
+### Key Objectives
 * **Stochastic Modelling:** Visualise the time-evolution of interest rates according to the Vasicek Model using the Euler-Maruyama method and Monte Carlo simulations.
 * **Analytical Pricing:** Derive the Zero-Coupon Yield Curve using the model's affine term structure.
 * **Risk Forecasting:** Quantify interest rate probabilities using the Normal Distribution.
 
 ---
 
-## 📸 Screenshots
+## Screenshots
 ![ simulation](sim.png)
 ![yield curve](yield.png)
 ![probability](gauss.png)
 
 ---
 
-## 🧮 The Mathematics
+## The Mathematics
 The core of the webapp relies on the Vasicek Model SDE, which assumes the instantaneous short rate $r_t$ follows a mean-reverting process:
 
 $$dr_t = a(b - r_t)dt + \sigma dW_t$$
@@ -56,7 +57,7 @@ $$P(t, T) = A(t, T) e^{-B(t, T) r_t}$$
 
 ---
 
-## 🛠️ Technical Implementation
+## Technical Implementation
 
 ## Tech Stack
 - Frontend: Streamlit (Custom CSS for glassmorphism/fintech UI).
@@ -88,10 +89,12 @@ streamlit run app.py
 ## Insights & Risk Analysis
 The dashboard includes logic to detect Yield Curve Inversion ($r_{long} < r_{short}$), a reliable leading indicator of economic recession. The probability forecaster also calculates 95% Confidence Intervals for future rates, aiding in VaR (Value at Risk) analysis.
 
-## MIT Licence
+## License
 
-This project is licensed under the **MIT Licence**. 
+Copyright © 2026 Sajid Ahmed
 
-This means you are free to use, copy, modify, and distribute the software for any purpose, including commercial applications, provided that the original copyright notice and this permission notice are included in all copies or substantial portions of the software.
+This program is free software: you can redistribute it and/or modify it under the terms of the **GNU General Public License** as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
-*See the [LICENSE](LICENSE) file for the full text.*
+This program is distributed in the hope that it will be useful, but **WITHOUT ANY WARRANTY**; without even the implied warranty of **MERCHANTABILITY** or **FITNESS FOR A PARTICULAR PURPOSE**. 
+
+See the [LICENSE](LICENSE) file for more details.
