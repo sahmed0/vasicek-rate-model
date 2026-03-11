@@ -1,0 +1,81 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      # For stlite, simply creating the build directory and transferring the necessary assets
+      - name: Build static files
+        run: |
+          mkdir build
+          cp app.py vasicek.py requirements.txt gauss.png sim.png yield.png build/
+          
+      # Dynamically inject the correct index.html mapping directly into the build directory
+      - name: Create index.html bundle
+        run: |
+          cat << 'EOF' > build/index.html
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="UTF-8" />
+              <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+              <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+              <title>Vasicek Rate Model</title>
+              <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.73.1/build/stlite.css" />
+            </head>
+            <body>
+              <div id="root"></div>
+              <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.73.1/build/stlite.js"></script>
+              <script>
+                stlite.mount(
+                  {
+                    requirements: ["numpy", "pandas", "plotly", "scipy"],
+                    entrypoint: "app.py",
+                    files: {
+                      "app.py": { url: "./app.py" },
+                      "vasicek.py": { url: "./vasicek.py" },
+                      "gauss.png": { url: "./gauss.png" },
+                      "sim.png": { url: "./sim.png" },
+                      "yield.png": { url: "./yield.png" }
+                    },
+                  },
+                  document.getElementById("root")
+                );
+              </script>
+            </body>
+          </html>
+          EOF
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './build'
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
