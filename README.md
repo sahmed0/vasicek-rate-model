@@ -1,8 +1,7 @@
 # Vasicek Interest Rate Model
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://vasicekmodel.streamlit.app)
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
+![License](https://img.shields.io/badge/License-GPLv3-green)
 ![Status](https://img.shields.io/badge/Status-Live-success)
 
 > **Live Demo:** [Click here to launch the dashboard](https://vasicekmodel.streamlit.app)
@@ -22,10 +21,22 @@ Built with **Python** and **Streamlit**, it bridges the gap between solving Stoc
 ---
 
 ## 📸 Screenshots
-![ simulation](sim.png)
-![yield curve](yield.png)
-![probability](gauss.png)
+This is an example simulation with the following parameters:
+* Current Rate ($$r_0$$) = 3.75% (UK short-term base rate as of Jan 2026)
+* Long Term Mean ($$b$$) = 2.65% (UK long term mean since the 2008 financial crisis)
+* Reversion Speed ($$a$$) = 0.30 
+* Volatility ($$σ$$) = 0.020
+* Time Horizon ($$Yrs$$) = 10
+* Simulations ($$N$$) = 100
 
+![ simulation](public/sim.png)
+This figure shows the stochastic paths for the short-term interest rate over a 10 year period, calculated via 100 Monte Carlo simulations using the Euler-Maruyama discretisation method. The dotted line shows the expected interest rate over this time. (Only 100 simulations were used to avoid overcrowding of the graph for illustrative purposes, however the model is capable of making thousands of simulations.)
+
+![yield curve](public/yield.png)
+This figure shows the predicted zero-coupon bond yield curve over a 10 year period.
+
+![probability](public/gauss.png)
+This figure shows the probability distribution of the short-term interest rate in 5 years time. The interest rate is expected to be 2.90%.
 ---
 
 ## 🧮 The Mathematics
