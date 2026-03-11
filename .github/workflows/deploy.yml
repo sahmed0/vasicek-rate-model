@@ -30,7 +30,7 @@ jobs:
       - name: Build static files
         run: |
           mkdir build
-          cp app.py vasicek.py requirements.txt gauss.png sim.png yield.png build/
+          cp app.py vasicek.py charts.py requirements.txt build/
           
       # Dynamically inject the correct index.html mapping directly into the build directory
       - name: Create index.html bundle
@@ -56,9 +56,7 @@ jobs:
                     files: {
                       "app.py": { url: "./app.py" },
                       "vasicek.py": { url: "./vasicek.py" },
-                      "gauss.png": { url: "./gauss.png" },
-                      "sim.png": { url: "./sim.png" },
-                      "yield.png": { url: "./yield.png" }
+                      "charts.py": { url: "./charts.py" }
                     },
                   },
                   document.getElementById("root")
