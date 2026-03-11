@@ -5,6 +5,7 @@
 ![Status](https://img.shields.io/badge/Status-Live-success)
 
 ## ⏯️ [Click here to launch the dashboard](https://sajidahmed.co.uk/vasicek-rate-model/)
+**Note: Upon first access it may take a few seconds for Streamlit to build the webapp in your browser  .**
 
 ## Project Overview
 This project is an interactive quantitative finance dashboard that models interest rate term structures using the **Vasicek Short-Rate Model**.
