@@ -52,7 +52,7 @@ jobs:
               <script>
                 stlite.mount(
                   {
-                    requirements: ["numpy", "pandas", "plotly", "scipy", "streamlit"],
+                    requirements: ["numpy", "pandas", "plotly", "scipy"],
                     entrypoint: "app.py",
                     files: {
                       "app.py": { url: "./app.py" },
