@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 def simulate_vasicek(r0, a, b, sigma, T=1.0, dt=0.01, num_sims=1):
     """
@@ -72,15 +71,14 @@ def calculate_yield_curve(r0, a, b, sigma, max_maturity=30):
     
     A_term1 = (b - (sigma**2) / (2 * a**2)) * (B - maturities)
     A_term2 = (sigma**2) / (4 * a) * (B**2)
-    A = np.exp(A_term1 - A_term2)
-    
-    price = A * np.exp(-B * r0)
+
+    ln_A = A_term1 - A_term2
+    ln_price = ln_A - (B * r0)
     
     # Yield = -ln(Price) / maturity
     yields = np.zeros_like(maturities)
-    
     nonzero_idx = maturities > 0
-    yields[nonzero_idx] = -np.log(price[nonzero_idx]) / maturities[nonzero_idx]
+    yields[nonzero_idx] = -ln_price[nonzero_idx] / maturities[nonzero_idx]
     
     if not nonzero_idx[0]:
         yields[0] = r0
@@ -103,9 +101,9 @@ def calculate_future_distribution(r0, a, b, sigma, t):
     
     expected_mean = r0 * np.exp(-a * t) + b * (1 - np.exp(-a * t))
     
-    # Var(r_t) = (sigma^2 / 2a) * (1 - e^(-2at))
+    # Variance (derived from Ito Isometry)
     variance = (sigma**2 / (2 * a)) * (1 - np.exp(-2 * a * t))
     
     std_dev = np.sqrt(variance)
     
-    return expected_mean, std_dev
+    return expected_mean, std_dev

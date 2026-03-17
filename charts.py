@@ -1,120 +1,188 @@
-import plotly.graph_objects as go
 import numpy as np
-from scipy.stats import norm
+import colorsys
+
+def get_vivid_color(index, total):
+    """
+    Returns a vivid color from the full HSV spectrum.
+    """
+    if total <= 1:
+        hue = 0.0
+    else:
+        hue = index / total
+    
+    rgb = colorsys.hsv_to_rgb(hue, 0.9, 0.9)
+    return '#%02x%02x%02x' % (int(rgb[0]*255), int(rgb[1]*255), int(rgb[2]*255))
 
 def create_simulation_chart(time_axis, rate_paths, expected_path, num_sims, long_term_mean, time_horizon):
     """
-    Create the main Vasicek rate simulation chart.
-    
-    :param time_axis: 1D flat array for the x-axis time series.
-    :param rate_paths: 2D Matrix of dimension (N_steps, num_sims) containing generated paths.
-    :param expected_path: Tuple (exp_time, exp_rates) from expected path calculation.
-    :param num_sims: Number of simulations for naming traces.
-    :param long_term_mean: Reversion mean (b parameter).
-    :param time_horizon: Simulation length in years (T parameter).
-    :return: go.Figure: The configured Plotly figure.
+    Create the main Vasicek rate simulation chart with vivid multicolor paths.
     """
-    fig = go.Figure()
+    data = []
     
+    # Simulation paths
     for i in range(num_sims):
-        fig.add_trace(go.Scatter(
-            x=time_axis, y=rate_paths[:, i], 
-            mode='lines', 
-            opacity=0.9, 
-            line=dict(width=1),
-            name=f'Sim {i+1}',
-            showlegend=False
-        ))
+        data.append({
+            "x": time_axis.tolist() if isinstance(time_axis, np.ndarray) else time_axis,
+            "y": rate_paths[:, i].tolist() if isinstance(rate_paths, np.ndarray) else rate_paths[:, i],
+            "mode": "lines",
+            "opacity": 0.4,
+            "line": {"width": 1, "color": get_vivid_color(i, num_sims)},
+            "name": f"Sim {i+1}",
+            "showlegend": False,
+            "hoverinfo": "none"
+        })
 
+    # Expected Rate Line
     exp_time, exp_rates = expected_path
-    fig.add_trace(go.Scatter(
-        x=exp_time, y=exp_rates, 
-        mode='lines', 
-        name='Expected Path',
-        line=dict(color='#111827', width=3, dash='dash')
-    ))
-    
-    fig.add_hline(y=long_term_mean, line_dash="dot", line_color="#DC2626", annotation_text="Long Term Mean")
+    data.append({
+        "x": exp_time.tolist() if isinstance(exp_time, np.ndarray) else exp_time,
+        "y": exp_rates.tolist() if isinstance(exp_rates, np.ndarray) else exp_rates,
+        "mode": "lines",
+        "name": "Expected Rate",
+        "showlegend": True,
+        "line": {"color": "#1a1a1a", "width": 3, "dash": "dot"}
+    })
 
-    fig.update_layout(
-        template="plotly_white",
-        xaxis_title="Time (Years)",
-        yaxis_title="Interest Rate",
-        height=600,
-        margin=dict(l=20, r=20, t=40, b=20),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(family="Outfit", size=14, color="#4B5563"),
-        hoverlabel=dict(bgcolor="#FFFFFF", font_size=14, font_family="Outfit")
-    )
+    # Long Term Mean Line
+    data.append({
+        "x": [0, time_horizon],
+        "y": [long_term_mean, long_term_mean],
+        "mode": "lines",
+        "name": "Long Term Mean",
+        "showlegend": True,
+        "line": {"color": "#000000", "width": 2}
+    })
+
+    layout = {
+        "template": "plotly_white",
+        "xaxis": {
+            "title": {"text": "Years", "standoff": 20},
+            "showgrid": False,
+            "zeroline": False,
+            "showline": True,
+            "linecolor": "#e9ecef",
+            "linewidth": 2,
+            "automargin": True
+        },
+        "yaxis": {
+            "title": {"text": "Interest Rate", "standoff": 20},
+            "showgrid": True,
+            "gridcolor": "#f0f2f5",
+            "zeroline": False,
+            "showline": True,
+            "linecolor": "#e9ecef",
+            "linewidth": 2,
+            "tickformat": ".1%",
+            "automargin": True
+        },
+        "margin": {"l": 60, "r": 30, "t": 40, "b": 60},
+        "paper_bgcolor": "rgba(0,0,0,0)",
+        "plot_bgcolor": "rgba(0,0,0,0)",
+        "font": {"family": "Plus Jakarta Sans", "size": 13, "color": "#495057"},
+        "hovermode": "x unified",
+        "legend": {
+            "orientation": "h",
+            "yanchor": "bottom",
+            "y": 1.02,
+            "xanchor": "right",
+            "x": 1,
+            "font": {"size": 12, "color": "#1a1a1a"}
+        }
+    }
     
-    return fig
+    return {"data": data, "layout": layout}
 
 def create_yield_curve_chart(maturities, yields):
     """
-    Create the implied yield curve chart based on Vasicek parameters.
-    
-    :param maturities: X-axis data points (time in years).
-    :param yields: Y-axis data points (implied zeros yield).
-    :return: go.Figure: The configured Plotly figure.
+    Create the implied yield curve chart.
     """
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=maturities, y=yields, 
-        mode='lines', 
-        name='Yield Curve',
-        fill='tozeroy',
-        fillcolor='rgba(37, 99, 235, 0.1)',
-        line=dict(color='#2563EB', width=4)
-    ))
+    data = [{
+        "x": maturities.tolist() if isinstance(maturities, np.ndarray) else maturities,
+        "y": yields.tolist() if isinstance(yields, np.ndarray) else yields,
+        "mode": "lines",
+        "name": "Yield Curve",
+        "fill": "tozeroy",
+        "fillcolor": "rgba(255, 102, 0, 0.1)",
+        "line": {"color": "#ff6600", "width": 3}
+    }]
 
-    fig.update_layout(
-        template="plotly_white",
-        xaxis_title="Maturity (Years)",
-        yaxis_title="Yield",
-        height=600,
-        margin=dict(l=20, r=20, t=40, b=20),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(family="Outfit", size=14, color="#4B5563"),
-        hoverlabel=dict(bgcolor="#FFFFFF", font_size=14, font_family="Outfit")
-    )
+    layout = {
+        "template": "plotly_white",
+        "xaxis": {
+            "title": {"text": "Maturity (Years)", "standoff": 20},
+            "showgrid": True,
+            "gridcolor": "#f0f2f5",
+            "showline": True,
+            "linecolor": "#e9ecef",
+            "linewidth": 2,
+            "automargin": True
+        },
+        "yaxis": {
+            "title": {"text": "Yield", "standoff": 20},
+            "showgrid": True,
+            "gridcolor": "#f0f2f5",
+            "showline": True,
+            "linecolor": "#e9ecef",
+            "linewidth": 2,
+            "tickformat": ".1%",
+            "automargin": True
+        },
+        "margin": {"l": 60, "r": 30, "t": 30, "b": 60},
+        "paper_bgcolor": "rgba(0,0,0,0)",
+        "plot_bgcolor": "rgba(0,0,0,0)",
+        "font": {"family": "Plus Jakarta Sans", "size": 13, "color": "#495057"},
+        "hovermode": "x unified"
+    }
     
-    return fig
+    return {"data": data, "layout": layout}
 
 def create_distribution_chart(mu, std, x_axis, y_axis):
     """
-    Create a probability distribution chart showing future rate forecast distribution.
-    
-    :param mu: Expected rate mean.
-    :param std: Expected rate standard deviation.
-    :param x_axis: X-axis plot values (rate levels).
-    :param y_axis: Y-axis plot values (probability densities).
-    :return: go.Figure: The configured Plotly figure.
+    Create a probability distribution chart.
     """
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=x_axis, y=y_axis,
-        mode='lines',
-        name='Probability Density',
-        fill='tozeroy',
-        fillcolor='rgba(37, 99, 235, 0.1)',
-        line=dict(color="#2563EB", width=3)
-    ))
+    data = [{
+        "x": x_axis.tolist() if isinstance(x_axis, np.ndarray) else x_axis,
+        "y": y_axis.tolist() if isinstance(y_axis, np.ndarray) else y_axis,
+        "mode": "lines",
+        "name": "Probability Density",
+        "fill": "tozeroy",
+        "fillcolor": "rgba(255, 102, 0, 0.1)",
+        "line": {"color": "#ff6600", "width": 3}
+    }]
     
-    fig.add_vline(x=mu, line_dash="dash", line_color="#111827")
+    layout = {
+        "template": "plotly_white",
+        "xaxis": {
+            "title": {"text": "Interest Rate", "standoff": 20},
+            "tickformat": ".1%",
+            "showgrid": True,
+            "gridcolor": "#f0f2f5",
+            "showline": True,
+            "linecolor": "#e9ecef",
+            "linewidth": 2,
+            "automargin": True
+        },
+        "yaxis": {
+            "title": {"text": "Probability Density", "standoff": 20},
+            "showgrid": True,
+            "gridcolor": "#f0f2f5",
+            "showline": True,
+            "linecolor": "#e9ecef",
+            "linewidth": 2,
+            "showticklabels": False,
+            "automargin": True
+        },
+        "margin": {"l": 60, "r": 30, "t": 30, "b": 60},
+        "paper_bgcolor": "rgba(0,0,0,0)",
+        "plot_bgcolor": "rgba(0,0,0,0)",
+        "font": {"family": "Plus Jakarta Sans", "size": 13, "color": "#495057"},
+        "shapes": [{
+            "type": "line",
+            "x0": mu, "x1": mu,
+            "y0": 0, "y1": 1,
+            "yref": "paper",
+            "line": {"color": "#1a1a1a", "width": 2, "dash": "dash"}
+        }]
+    }
     
-    fig.update_layout(
-        template="plotly_white",
-        xaxis_title="Interest Rate",
-        yaxis_title="Probability Density",
-        xaxis=dict(tickformat=".1%"),
-        height=500,
-        margin=dict(l=20, r=20, t=40, b=20),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        font=dict(family="Outfit", size=14, color="#4B5563"),
-        hoverlabel=dict(bgcolor="#FFFFFF", font_size=14, font_family="Outfit")
-    )
-    
-    return fig
+    return {"data": data, "layout": layout}

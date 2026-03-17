@@ -26,52 +26,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
-      # For stlite, simply creating the build directory and transferring the necessary assets
       - name: Build static files
         run: |
           mkdir build
-          cp app.py vasicek.py charts.py requirements.txt build/
-          cp -r public/favicon build/
+          # Copy main application files
+          cp index.html main.py vasicek.py charts.py requirements.txt pyscript.toml build/
+          # Copy assets directory
+          cp -r public build/
+          # Ensure GitHub Pages doesn't ignore files
           touch build/.nojekyll
           
-      # Dynamically inject the correct index.html mapping directly into the build directory
-      - name: Create index.html bundle
-        run: |
-          cat << 'EOF' > build/index.html
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta charset="UTF-8" />
-              <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-              <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-              <title>Vasicek Rate Model</title>
-              <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
-              <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
-              <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
-              <link rel="manifest" href="favicon/site.webmanifest">
-              <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.73.1/build/stlite.css" />
-            </head>
-            <body>
-              <div id="root"></div>
-              <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.73.1/build/stlite.js"></script>
-              <script>
-                stlite.mount(
-                  {
-                    requirements: ["numpy", "pandas", "plotly", "scipy"],
-                    entrypoint: "app.py",
-                    files: {
-                      "app.py": { url: "./app.py" },
-                      "vasicek.py": { url: "./vasicek.py" },
-                      "charts.py": { url: "./charts.py" }
-                    },
-                  },
-                  document.getElementById("root")
-                );
-              </script>
-            </body>
-          </html>
-          EOF
-
       - name: Setup Pages
         uses: actions/configure-pages@v4
         
