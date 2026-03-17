@@ -109,7 +109,7 @@ def create_yield_curve_chart(maturities, yields):
     layout = {
         "template": "plotly_white",
         "xaxis": {
-            "title": {"text": "Maturity (Years)", "standoff": 20},
+            "title": {"text": "Time to Maturity (Years)", "standoff": 20},
             "showgrid": True,
             "gridcolor": "#f0f2f5",
             "showline": True,
