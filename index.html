@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vasicek Model | Sajid Ahmed</title>
+
+    <meta name="description"
+        content="Interactive Interest Rate Modelling using the Vasicek SDE. Visualise simulations, yield curves, and probability forecasts entirely in your browser.">
+    <link rel="icon" type="image/x-icon" href="./public/favicon/favicon.ico">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+        crossorigin="anonymous"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            renderMathInElement(document.body, {
+                // Tell KaTeX to look for both display ($$) and inline ($) math
+                delimiters: [
+                    { left: "$$", right: "$$", display: true },
+                    { left: "$", right: "$", display: false }
+                ],
+                throwOnError: false // Prevent the whole page from breaking if there's a typo in one formula
+            });
+        });
+    </script>
+
+    <style>
+        :root {
+            --primary: #ff6600;
+            --text-main: #1a1a1a;
+            --text-muted: #6c757d;
+
+            /* Glassmorphism Variables */
+            --glass-surface: rgba(255, 255, 255, 0.2);
+            --glass-surface-inner: rgba(255, 255, 255, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --glass-blur: blur(8px);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+
+            --radius-lg: 1.25rem;
+            --radius-md: 0.75rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-main);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            padding: 2rem;
+            min-height: 100vh;
+
+            /* Subtle colorful mesh gradient to make the glass pop */
+            background-color: #f4f6f9;
+            background-image:
+                radial-gradient(at 0% 0%, hsla(28, 100%, 74%, 0.4) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(210, 100%, 86%, 0.5) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, hsla(355, 100%, 93%, 0.5) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, hsla(28, 100%, 76%, 0.3) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-header h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.04em;
+        }
+
+        .dashboard-header p {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Bento Box Grid */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: minmax(350px, auto);
+            gap: 1.5rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Individual Bento Tile (The Glass Panel) */
+        .bento-tile {
+            background: var(--glass-surface);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border: 1.5px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--glass-shadow);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+
+        /* Grid Spanning Assignments */
+        .tile-sim {
+            grid-column: span 3;
+            grid-row: span 2;
+        }
+
+        .tile-controls {
+            grid-column: span 1;
+            grid-row: span 2;
+        }
+
+        .tile-yield {
+            grid-column: span 2;
+            grid-row: span 1;
+        }
+
+        .tile-dist {
+            grid-column: span 2;
+            grid-row: span 1;
+        }
+
+        .tile-maths {
+            grid-column: span 2;
+            grid-row: span 1;
+        }
+
+        .tile-code {
+            grid-column: span 2;
+            grid-row: span 1;
+        }
+
+        .tile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .tile-header h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .tile-header p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Expand Button */
+        .expand-btn {
+            background: var(--glass-surface-inner);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--radius-md);
+            transition: all 0.2s;
+        }
+
+        .expand-btn:hover {
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--primary);
+        }
+
+        /* Expanded State (Modal Overlay) */
+        .bento-tile.expanded {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            right: 2rem;
+            bottom: 2rem;
+            z-index: 1000;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            grid-column: unset !important;
+            grid-row: unset !important;
+            background: rgba(255, 255, 255, 0.85);
+            /* Slightly more opaque when full screen for readability */
+        }
+
+        /* Dim Background when Expanded */
+        body.has-expanded-tile::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 999;
+        }
+
+        /* Chart Containers */
+        .chart-container {
+            width: 100%;
+            flex-grow: 1;
+            min-height: 300px;
+            position: relative;
+        }
+
+        /* Controls Layout Restyling */
+        .controls-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .control-group input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--glass-surface-inner);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .control-group input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.7);
+        }
+
+        .slider-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slider-control input[type="range"] {
+            flex-grow: 1;
+            accent-color: var(--primary);
+        }
+
+        /* Metrics Overlay Restyling */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric-card {
+            background: var(--glass-surface-inner);
+            border: 1px solid var(--glass-border);
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        /* Math Section */
+        .math-block {
+            background: var(--glass-surface-inner);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            font-family: 'JetBrains Mono', monospace;
+            margin: 1rem 0;
+            border: 1px solid var(--glass-border);
+        }
+
+        /* Loader */
+        #loading {
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            transition: opacity 1s;
+        }
+
+        .spinner {
+            width: 72px;
+            height: 72px;
+            border: 3px solid rgba(255, 102, 0, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            margin-bottom: 2rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tile-sim,
+            .tile-controls,
+            .tile-yield,
+            .tile-dist,
+            .tile-maths,
+            .tile-code {
+                grid-column: span 1;
+                grid-row: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="loading">
+        <div class="spinner"></div>
+        <p style="font-size: 1.5rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;">
+            Initialising Vasicek Model
+        </p>
+    </div>
+
+    <header class="dashboard-header">
+        <h1>Vasicek Model</h1>
+        <p>Interactive Stochastic Interest Rate Simulation & Yield Curve Modelling</p>
+        <p>Created by Sajid Ahmed</p>
+        <p><a href="https://github.com/sahmed0/vasicek-rate-model.git" target="_blank">GitHub</a></p>
+    </header>
+
+    <main class="bento-grid">
+
+        <article class="bento-tile tile-sim">
+            <div class="tile-header">
+                <div>
+                    <h2>Monte Carlo Simulation</h2>
+                    <p>Exploring the stochastic nature of short-term interest rates.</p>
+                </div>
+                <button class="expand-btn" onclick="toggleExpand(this)">⛶</button>
+            </div>
+            <div id="chart-sim" class="chart-container"></div>
+        </article>
+
+        <article class="bento-tile tile-controls">
+            <div class="tile-header">
+                <div>
+                    <h2>Model Parameters</h2>
+                    <p>Adjust variables to recalculate the model.</p>
+                </div>
+            </div>
+
+            <div class="controls-wrapper">
+                <div class="control-group">
+                    <label for="current_rate">Current Rate ($r₀$)</label>
+                    <input type="number" id="current_rate" value="3.75" step="0.01">
+                </div>
+                <div class="control-group">
+                    <label for="long_term_mean">Long Term Mean ($b$)</label>
+                    <input type="number" id="long_term_mean" value="2.65" step="0.01">
+                </div>
+                <div class="control-group">
+                    <label for="reversion_speed">Reversion Speed ($a$)</label>
+                    <input type="number" id="reversion_speed" value="0.30" step="0.01">
+                </div>
+                <div class="control-group">
+                    <label for="volatility">Volatility ($σ$)</label>
+                    <input type="number" id="volatility" value="0.020" step="0.001">
+                </div>
+                <div class="control-group">
+                    <label>Time Horizon</label>
+                    <div class="slider-control">
+                        <input type="range" id="forecast_slider" min="1" max="20" step="1" value="5">
+                        <span id="slider-val" style="font-weight: 700; color: var(--primary);">5y</span>
+                    </div>
+                    <input type="hidden" id="time_horizon" value="5">
+                    <input type="hidden" id="num_simulations_hidden" value="100">
+                </div>
+                <div class="control-group">
+                    <label for="num_simulations">Simulations</label>
+                    <input type="number" id="num_simulations" value="100" step="1">
+                </div>
+            </div>
+        </article>
+
+        <article class="bento-tile tile-yield">
+            <div class="tile-header">
+                <div>
+                    <h2>The Term Structure</h2>
+                    <p>Predicted cost of capital over time.</p>
+                </div>
+                <button class="expand-btn" onclick="toggleExpand(this)">⛶</button>
+            </div>
+            <div id="chart-yield" class="chart-container"></div>
+        </article>
+
+        <article class="bento-tile tile-dist">
+            <div class="tile-header">
+                <div>
+                    <h2>Statistical Probability</h2>
+                    <p>Likelihood of a specific rate outcome.</p>
+                </div>
+                <button class="expand-btn" onclick="toggleExpand(this)">⛶</button>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Expected Rate</div>
+                    <div id="metric-expected" class="metric-value">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Uncertainty</div>
+                    <div id="metric-std" class="metric-value">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">95% Confidence</div>
+                    <div id="metric-conf" class="metric-value">-</div>
+                </div>
+            </div>
+
+            <div id="chart-dist" class="chart-container"></div>
+        </article>
+
+        <article class="bento-tile tile-maths">
+            <div class="tile-header">
+                <div>
+                    <h2>The Mathematics</h2>
+                    <p>The core logic driving the simulation.</p>
+                </div>
+                <button class="expand-btn" onclick="toggleExpand(this)">⛶</button>
+            </div>
+
+            <div style="overflow-y: auto; padding-right: 0.5rem;">
+                <h3 style="margin-bottom: 0.5rem;">1. The Vasicek Model SDE</h3>
+                <p>The Vasicek model describes the evolution of interest rates as a <strong>Stochastic Differential
+                        Equation (SDE)</strong>. It captures the tension between random market shocks and a long-term
+                    economic equilibrium.</p>
+
+                <div class="math-block" style="text-align: center; font-size: 1.2rem;">
+                    $$dr_t = a(b - r_t)dt + \sigma dW_t$$
+                </div>
+
+                <ul style="margin-left: 1.5rem; margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
+                    <li>$r_t$: The instantaneous short rate at time $t$.</li>
+                    <li>$a$: <strong>Speed of Reversion</strong>. The gravitational pull back to equilibrium.</li>
+                    <li>$b$: <strong>Long-Term Mean</strong>. The equilibrium level.</li>
+                    <li>$\sigma$: <strong>Volatility</strong>. The magnitude of the random shocks.</li>
+                    <li>$dW_t$: <strong>Wiener Process</strong> (Brownian Motion). $dW_t \sim N(0, dt)$.</li>
+                </ul>
+
+                <hr style="border: 0; border-top: 1px solid var(--card-border); margin: 1.5rem 0;">
+
+                <h3 style="margin-bottom: 0.5rem;">2. The Ornstein-Uhlenbeck Solution</h3>
+                <p>This SDE is a specific case of the Ornstein-Uhlenbeck process and can be solved explicitly using
+                    Itō's Lemma:</p>
+
+                <div class="math-block" style="text-align: center; font-size: 1.1rem;">
+                    $$r_t = r_0 e^{-at} + b(1 - e^{-at}) + \sigma \int_0^t e^{-a(t-s)} dW_s$$
+                </div>
+
+                <ul style="margin-left: 1.5rem; margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
+                    <li><strong>Deterministic Part:</strong> $r_0 e^{-at} + b(1 - e^{-at})$ (This creates the "Expected
+                        Path" line).</li>
+                    <li><strong>Stochastic Part:</strong> $\sigma \int_0^t e^{-a(t-s)} dW_s$ (This creates the "random
+                        noise" in the simulation).</li>
+                </ul>
+
+                <hr style="border: 0; border-top: 1px solid var(--card-border); margin: 1.5rem 0;">
+
+                <h3 style="margin-bottom: 0.5rem;">3. Bond Pricing (Affine Term)</h3>
+                <p>The model produces a closed-form solution for bond prices. The price of a Zero-Coupon Bond $P(t,T)$
+                    maturing at time $T$ is:</p>
+
+                <div class="math-block" style="text-align: center; font-size: 1.2rem;">
+                    $$P(t, T) = A(t, T) e^{-B(t, T) r_t}$$
+                </div>
+
+                <p style="font-size: 0.9rem; color: var(--text-muted);">This relationship implies that the Yield Curve
+                    is determined entirely by the short rate $r_t$ and the model parameters.</p>
+            </div>
+        </article>
+
+        <article class="bento-tile tile-code">
+            <div class="tile-header">
+                <div>
+                    <h2>The Implementation</h2>
+                    <p>The Python code constructing the models.</p>
+                </div>
+                <button class="expand-btn" onclick="toggleExpand(this)">⛶</button>
+            </div>
+
+            <div style="overflow-y: auto; padding-right: 0.5rem;">
+                <h3 style="margin-bottom: 0.5rem;">1. Euler-Maruyama Discretisation</h3>
+                <p>Since continuous time ($dt$) is impossible to model on a discrete computer, we approximate the
+                    Vasicek SDE using the <strong>Euler-Maruyama method</strong>.</p>
+
+                <pre class="math-block" style="font-size: 0.85rem; overflow-x: auto;"><code>def simulate_vasicek(r0, a, b, sigma, T=1.0, dt=0.01, num_sims=1):
+    .
+    .
+    .
+    # Scale random shocks by sqrt(dt) as variance grows linearly with time.
+    shocks = sigma * np.sqrt(dt) * np.random.normal(size=(N, num_sims))
+    
+    # Iterate through time steps to apply the Euler-Maruyama update rule.
+    for t in range(1, N):
+        drift = a * (b - rates[t-1, :]) * dt
+        rates[t, :] = rates[t-1, :] + drift + shocks[t, :]
+        
+    return time, rates</code></pre>
+
+                <hr style="border: 0; border-top: 1px solid var(--card-border); margin: 1.5rem 0;">
+
+                <h3 style="margin-bottom: 0.5rem;">2. Probability Distribution</h3>
+                <p>To generate the probability distributions, we do not need to run simulations. We use the statistical
+                    properties of the normal distribution derived directly from the model:</p>
+
+                <pre class="math-block" style="font-size: 0.85rem; overflow-x: auto;"><code>def calculate_future_distribution(r0, a, b, sigma, t):
+    expected_mean = r0 * np.exp(-a * t) + b * (1 - np.exp(-a * t))
+    
+    # Variance (derived from Ito Isometry)
+    variance = (sigma**2 / (2 * a)) * (1 - np.exp(-2 * a * t))
+    
+    std_dev = np.sqrt(variance)
+    
+    return expected_mean, std_dev</code></pre>
+            </div>
+        </article>
+
+    </main>
+
+    <script>
+        // --- 1. Loader Logic ---
+        window.hideLoader = () => {
+            const loader = document.getElementById('loading');
+            loader.style.opacity = '0';
+            setTimeout(() => loader.style.display = 'none', 1000);
+        };
+
+        // --- 2. Slider Sync Logic ---
+        const slider = document.getElementById('forecast_slider');
+        const sliderVal = document.getElementById('slider-val');
+        const timeHorizonHidden = document.getElementById('time_horizon');
+
+        slider.addEventListener('input', () => {
+            const val = parseFloat(slider.value).toFixed(1);
+            sliderVal.textContent = val + 'y';
+            timeHorizonHidden.value = slider.value;
+        });
+
+        // --- 3. Bento Box Expand Logic ---
+        function toggleExpand(button) {
+            const tile = button.closest('.bento-tile');
+            const isExpanded = tile.classList.contains('expanded');
+
+            if (isExpanded) {
+                // Shrink back
+                tile.classList.remove('expanded');
+                document.body.classList.remove('has-expanded-tile');
+                button.textContent = '⛶'; // Expand icon
+            } else {
+                // Enlarge
+                tile.classList.add('expanded');
+                document.body.classList.add('has-expanded-tile');
+                button.textContent = '✕'; // Close icon
+            }
+
+            // Force Plotly/Charts to resize properly to new container dimensions
+            // Use setTimeout to allow the CSS transition to finish before calculating bounds
+            setTimeout(() => {
+                window.dispatchEvent(new Event('resize'));
+            }, 410);
+        }
+    </script>
+
+    <py-config>
+        packages = ["numpy", "scipy"]
+        [[fetch]]
+        files = ["vasicek.py", "charts.py"]
+    </py-config>
+
+    <script type="py" src="./main.py"></script>
+
+</body>
+
+</html>
