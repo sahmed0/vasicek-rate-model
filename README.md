@@ -1,107 +1,141 @@
-# Vasicek Interest Rate Model
+# Vasicek Rate Model | Interactive Stochastic Simulation
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-![Python](https://img.shields.io/badge/Python-3.9%2B-yellow)
-![Status](https://img.shields.io/badge/Status-Live-success)
+[![Python: 3.10+](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
+[![PyScript: 2024.1.1](https://img.shields.io/badge/PyScript-2024.1.1-orange.svg)](https://pyscript.net/)
 
-## ⏯️ [Click here to launch the dashboard](https://sajidahmed.co.uk/vasicek-rate-model/)
-**Note: Upon first access it may take a few seconds for Streamlit to build the webapp in your browser  .**
+An interactive web-based dashboard for exploring the **Vasicek Interest Rate Model**. This application performs real-time stochastic simulations, yield curve derivations, and probability forecasting entirely within the browser using PyScript.
 
-## Project Overview
-This project is an interactive quantitative finance dashboard that models interest rate term structures using the **Vasicek Short-Rate Model**.
-
-Built with **Python** and **Streamlit**, it bridges the gap between solving Stochastic Differential Equations (SDEs) and modelling Bonds and Interest Rates. It demonstrates how mean reversion affects bond pricing and allows users to visualise complex risk scenarios, such as yield curve inversions, in real time.
-
-### Key Objectives
-* **Stochastic Modelling:** Visualise the time-evolution of interest rates according to the Vasicek Model using the Euler-Maruyama method and Monte Carlo simulations.
-* **Analytical Pricing:** Derive the Zero-Coupon Yield Curve using the model's affine term structure.
-* **Risk Forecasting:** Quantify interest rate probabilities using the Normal Distribution.
+[**Live Demo**](https://sajidahmed.co.uk/vasicek-rate-model/)
 
 ---
 
-## 📸 Screenshots
-This is an example simulation with the following parameters:
-* Current Rate ($$r_0$$) = 3.75% (UK short-term base rate as of Jan 2026)
-* Long Term Mean ($$b$$) = 2.65% (UK long term mean since the 2008 financial crisis)
-* Reversion Speed ($$a$$) = 0.30 
-* Volatility ($$σ$$) = 0.020
-* Time Horizon ($$Yrs$$) = 10
-* Simulations ($$N$$) = 100
+## Table of Contents
+- [Key Features](#key-features)
+- [Architecture](#architecture)
+- [The Mathematics](#the-mathematics)
+- [Tech Stack](#tech-stack)
+- [Key Decisions](#key-decisions)
+- [Installation & Usage](#installation--usage)
+- [License](#license)
 
-![ simulation](public/sim.png)
-This figure shows the stochastic paths for the short-term interest rate over a 10 year period, calculated via 100 Monte Carlo simulations using the Euler-Maruyama discretisation method. The dotted line shows the expected interest rate over this time. (Only 100 simulations were used to avoid overcrowding of the graph for illustrative purposes, however the model is capable of making thousands of simulations.)
+---
 
-![yield curve](public/yield.png)
-This figure shows the predicted zero-coupon bond yield curve over a 10 year period.
+## Key Features
 
-![probability](public/gauss.png)
-This figure shows the probability distribution of the short-term interest rate in 5 years time. The interest rate is expected to be 2.90%.
+### 1. Monte Carlo Simulation
+Visualise hundreds of independent interest rate paths generated via Euler-Maruyama discretisation. The simulator accounts for mean reversion and volatility shocks in real-time.
+
+![Vasicek Simulation](public/sim.png)
+
+### 2. Analytical Yield Curve
+Derive the theoretical term structure for zero-coupon bonds based on the affine property of the Vasicek model.
+
+![Yield Curve](public/yield.png)
+
+### 3. Probability Distribution Forecasting
+Calculate the statistical likelihood of rate outcomes at any future horizon using the Ornstein-Uhlenbeck transition density.
+
+![Probability Distribution](public/gauss.png)
+
+### 4. Interactive "Bento Box" Dashboard
+A modern, glassmorphic UI that provides immediate feedback as model parameters are adjusted. Includes dynamic KaTeX typesetting for mathematical transparency.
+
+---
+
+## Architecture
+
+### System Flow
+The application follows a modular architecture where PyScript orchestrates the bridge between Pythonic scientific logic and JavaScript-driven visualisations.
+
+```mermaid
+graph TD
+    A[index.html] -->|Initialises| B[PyScript Runtime]
+    B -->|Orchestrates| C[main.py]
+    C -->|Mathematical Logic| D[vasicek.py]
+    C -->|Visualisation Config| E[charts.py]
+    
+    subgraph "Core Engine"
+        D -->|Euler-Maruyama| F[SDE Solver]
+        D -->|Analytical| G[Yield Curve Engine]
+        D -->|Statistical| H[Distribution Calculator]
+    end
+    
+    C -->|Render| I[Plotly.js Dashboard]
+```
+
+### Directory Tree
+```text
+vasicek-rate-model/
+├── public/                 # Static assets and UI screenshots
+├── charts.py               # Plotly chart configuration logic
+├── index.html              # Main UI and application entry point
+├── main.py                 # PyScript orchestration and event handling
+├── pyscript.toml           # PyScript environment configuration
+├── requirements.txt         # Python dependencies (NumPy, SciPy)
+└── vasicek.py              # Core mathematical implementation
+```
 
 ---
 
 ## The Mathematics
-The core of the webapp relies on the Vasicek Model SDE, which assumes the instantaneous short rate $r_t$ follows a mean-reverting process:
+
+The Vasicek model describes the evolution of interest rates as a **Stochastic Differential Equation (SDE)**:
 
 $$dr_t = a(b - r_t)dt + \sigma dW_t$$
 
-Where:
-* $a$: Speed of mean reversion.
-* $b$: Long-term mean equilibrium.
-* $\sigma$: Instantaneous volatility.
-* $dW_t$: Wiener process under the risk-neutral measure $\mathbb{Q}$.
-
-The webapp solves this equation using the **Euler-Maruyama Discretisation method** and **Monte Carlo Simulation**.
-
-### Euler-Maruyama Discretisation
-To simulate the SDE, I implemented the Euler-Maruyama method. The random shock is scaled by $\sqrt{dt}$ to account for the properties of Brownian Motion variance ($Var(W_t) = t$).
-
-```python
-# Snippet from vasicek.py
-shock = sigma * np.sqrt(dt) * np.random.normal()
-rates[t] = rates[t-1] + drift + shock
-```
-
-### Closed-Form Bond Pricing
-A key feature of this project is the implementation of the **Affine Term Structure** solution. The price of a Zero-Coupon Bond $P(t,T)$ is calculated analytically, ensuring $O(1)$ performance rather than relying on computationally expensive Monte Carlo convergence for pricing:
-
-$$P(t, T) = A(t, T) e^{-B(t, T) r_t}$$
+- **$a$ (Reversion Speed)**: The rate at which the process pulls back to the mean.
+- **$b$ (Long-Term Mean)**: The equilibrium interest rate level.
+- **$\sigma$ (Volatility)**: The magnitude of random market shocks.
+- **$dW_t$ (Wiener Process)**: Represents the stochastic component (Brownian Motion).
 
 ---
 
-## Technical Implementation
-
 ## Tech Stack
-- Frontend: Streamlit (Custom CSS for glassmorphism/fintech UI).
-- Computation: NumPy & SciPy (Vectorised calculations for yield curves).
-- Visualisation: Plotly (Interactive charts with 'hover-unified' contexts).
-  
+
+| Component | Technology |
+| :--- | :--- |
+| **Runtime** | [PyScript](https://pyscript.net/) (Pyodide) |
+| **Mathematics** | [NumPy](https://numpy.org/), [SciPy](https://scipy.org/) |
+| **Visualisation** | [Plotly.js](https://plotly.com/javascript/) |
+| **Typesetting** | [KaTeX](https://katex.org/) |
+| **Styling** | Vanilla CSS3 (Glassmorphism, Bento Grid) |
+
+---
+
+## Key Decisions
+
+| Decision | Rationale |
+| :--- | :--- |
+| **Client-side Execution** | Eliminates server costs and latency by running scientific simulations directly in the user's browser. |
+| **Vectorised Operations** | NumPy is utilised to generate hundreds of simulation paths simultaneously, ensuring fluid UI updates. |
+| **Decoupled Logic** | High-performance Python logic is separated from UI orchestration, allowing for easier auditing of the SDE implementation. |
+
+---
+
 ## Installation & Usage
-To run this project locally:
 
-Clone the repository
-```Bash
-git clone [ttps://github.com/sahmed0/vasicek-rate-model.git
-cd vasicek-rate-model
-```
-Create a virtual environment
-```Bash
-python -m venv venv
-source venv/bin/activate  # On Windows use: venv\Scripts\activate
-```
-Install dependencies
-```Bash
-pip install -r requirements.txt
-```
-Launch the application
-```Bash
-streamlit run app.py
-```
+### Prerequisites
+- A modern web browser with WebAssembly support (Chrome, Firefox, Safari, Edge).
+- A local web server for development.
 
-## Insights & Risk Analysis
-The dashboard includes logic to detect Yield Curve Inversion ($r_{long} < r_{short}$), a reliable leading indicator of economic recession. The probability forecaster also calculates 95% Confidence Intervals for future rates, aiding in VaR (Value at Risk) analysis.
+### Local Development
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/sahmed0/vasicek-rate-model.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd vasicek-rate-model
+   ```
+3. Start a local server (e.g., using Python):
+   ```bash
+   python -m http.server 8000
+   ```
+4. Open `http://localhost:8000` in your browser.
+
+---
 
 ## License
 
-This program is free software: you can redistribute it and/or modify it under the terms of the **GNU General Public License** as published by the Free Software Foundation.
-
-See the [LICENSE](LICENSE) file for more details.
+This project is licensed under the **GNU General Public License v3.0**. See the [LICENSE](LICENSE) file for the full text.
