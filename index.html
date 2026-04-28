@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Vasicek Model | Sajid Ahmed</title>
 
     <meta name="description"
@@ -12,8 +12,10 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
     <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
@@ -57,6 +59,10 @@
             --radius-md: 0.75rem;
         }
 
+        html {
+            scrollbar-width: none;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -96,6 +102,7 @@
         .dashboard-header p {
             color: var(--text-muted);
             font-weight: 500;
+            font-size: 1.2rem;
         }
 
         /* Bento Box Grid */
@@ -337,6 +344,34 @@
             margin-bottom: 2rem;
         }
 
+        /* --- Footer & Socials --- */
+        footer {
+            width: 100%;
+            max-height: fit-content;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem;
+            background: transparent;
+            box-sizing: border-box;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .social-icons a {
+            color: var(--text-muted);
+            font-size: 2.5rem;
+            transition: all 0.3s;
+        }
+
+        .social-icons a:hover {
+            color: var(--accent);
+            transform: translateY(-3px);
+        }
+
         @keyframes spin {
             to {
                 transform: rotate(360deg);
@@ -404,7 +439,7 @@
             }
 
             .dashboard-header p {
-                font-size: 0.9rem;
+                font-size: 1rem;
             }
 
             .spinner {
@@ -434,15 +469,13 @@
     <div id="loading">
         <div class="spinner"></div>
         <p style="font-size: 1.5rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;">
-            Initialising Vasicek Model
+            Initialising Monte Carlo Simulations...
         </p>
     </div>
 
     <header class="dashboard-header">
         <h1>Vasicek Model</h1>
         <p>Interactive Stochastic Interest Rate Simulation & Yield Curve Modelling</p>
-        <p>Created by Sajid Ahmed</p>
-        <p><a href="https://github.com/sahmed0/vasicek-rate-model.git" target="_blank">GitHub</a></p>
     </header>
 
     <main class="bento-grid">
@@ -642,8 +675,17 @@
     return expected_mean, std_dev</code></pre>
             </div>
         </article>
-
     </main>
+
+    <footer>
+        <div style="font-size: 1.2rem; color: var(--text-muted);">
+            <strong>Sajid Ahmed 2026</strong><br />Licensed under GNU GPL v3.0
+        </div>
+        <div class="social-icons">
+            <a href="https://github.com/sahmed0" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+            <a href="https://linkedin.com/in/s-ahmed1" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+        </div>
+    </footer>
 
     <script>
         // --- 1. Loader Logic ---
